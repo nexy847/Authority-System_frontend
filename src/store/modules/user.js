@@ -1,9 +1,9 @@
 import { login, logout, getInfo } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { getToken, setToken, removeToken,setTokenTime/**设置token过期时间 */} from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 
 const state = {
-  token: getToken(),
+  token: getToken(),//获取token信息
   name: '',
   avatar: '',
   introduction: '',
@@ -25,21 +25,37 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
+  },
+  SET_USERID: (state,userId) =>{
+    state.userId=userId
   }
 }
 
 const actions = {
-  // user login
+  // 用户登录
   login({ commit }, userInfo) {
+    //从用户信息中解构出用户名和密码
     const { username, password } = userInfo
+    console.log(username,password)
     return new Promise((resolve, reject) => {
+      //传递用户名和密码参数,调用src/api/user.js文件中的login()方法
       login({ username: username.trim(), password: password }).then(response => {
-        const { data } = response
-        commit('SET_TOKEN', data.token)
-        setToken(data.token)
+        //解构出后端返回的数据
+        console.log(username)
+        const { 
+          token,//token数据
+          expireTime//token过期时间
+        } = response//response里面的具体字段需要和后端对应
+        //将返回的token信息保存到store中
+        commit('SET_TOKEN', token)
+        //设置token
+        setToken(token)
+        //设置token过期时间
+        setTokenTime(expireTime);
+        //放行
         resolve()
       }).catch(error => {
-        reject(error)
+        reject(error)//拒绝访问
       })
     })
   },
@@ -54,7 +70,7 @@ const actions = {
           reject('Verification failed, please Login again.')
         }
 
-        const { roles, name, avatar, introduction } = data
+        const { roles, name, avatar, introduction,id } = data
 
         // roles must be a non-empty array
         if (!roles || roles.length <= 0) {
@@ -65,6 +81,10 @@ const actions = {
         commit('SET_NAME', name)
         commit('SET_AVATAR', avatar)
         commit('SET_INTRODUCTION', introduction)
+        //将用户id保存到vuex中
+        commit('SET_USERID',id)//用户id
+        //将权限字段保存到sessionStorage中
+        sessionStorage.setItem("codeList",JSON.stringify(roles));
         resolve(data)
       }).catch(error => {
         reject(error)

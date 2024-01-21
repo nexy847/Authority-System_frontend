@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+import http from '@/utils/request'
 
 export function getRoutes() {
   return request({
@@ -35,4 +36,28 @@ export function deleteRole(id) {
     url: `/vue-element-admin/role/${id}`,
     method: 'delete'
   })
+}
+
+export default{
+  async getRoleListApi(params){
+    return await http.get("/api/role/list",params);
+  },
+  async addRoleApi(params){
+    return await http.post("/api/role/add",params);
+  },
+  async updateRoleApi(params){
+    return await http.put("/api/role/update",params);
+  },
+  async getAssignTreeAPi(params){
+    return await http.get("/api/role/getAssignPermissionTree",params);
+  },
+  async assignSaveApi(params){
+    return await http.post("/api/role/saveRoleAssign",params);
+  },
+  async checkHaveUserApi(params){
+    return await http.getRestApi("/api/role/check",params);
+  },
+  async deleteRoleApi(params){
+    return await http.delete("/api/role/delete",params);
+  },
 }
